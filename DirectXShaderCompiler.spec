@@ -27,6 +27,8 @@ BuildRequires: libxml2-devel
 BuildRequires: ocaml
 BuildRequires: git
 BuildRequires: xz
+BuildRequires: pkgconfig(SPIRV-Headers)
+
 Provides:      directxshadercompiler = %{version}-%{release}
 Provides:      dxc = %{version}-%{release}
 
