@@ -17,12 +17,9 @@ License:       Apache-2.0 WITH LLVM-exception OR NCSA
 Group:         Development/Graphics
 URL:           https://github.com/microsoft/DirectXShaderCompiler/
 Source0:       https://github.com/microsoft/DirectXShaderCompiler/archive/refs/tags/v%{version}/%{name}-%{version}.tar.gz
-%if 0%{?use_clang}
+
 BuildRequires: clang-devel
 BuildRequires: lld
-%else
-BuildRequires: gcc-c++
-%endif
 BuildRequires: cmake
 BuildRequires: llvm-devel
 BuildRequires: ninja
@@ -66,20 +63,6 @@ DirectX Shader Compiler standalone dynamic library
 
 %prep
 %setup -q
-# clean out hardcoding
-%if 0%{?use_clang}
-sed -i -e 's/ -fno-exceptions//g' -e 's/ -fno-rtti//g' -e '/add_compile_options(-fno-rtti)/d' \
-        external/SPIRV-Tools/CMakeLists.txt \
-        external/effcee/cmake/setup_build.cmake
-sed -i -e '/"-Werror",/d' -e '/"-fno-exceptions",/d' -e '/"-fno-rtti",/d' \
-        external/SPIRV-Tools/build_defs.bzl
-sed -i -e '/CmdArgs.push_back("-fno-exceptions");/d' -e '/CmdArgs.push_back("-fno-rtti");/d' -e '/CmdArgs.push_back("-fno-rtti-data");/d' \
-        tools/clang/lib/Driver/Tools.cpp
-sed -i -e '/list(APPEND LLVM_COMPILE_FLAGS "-fno-exceptions")/d' \
-    -e '/list(APPEND LLVM_COMPILE_FLAGS "-fno-rtti")/d' \
-    -e '/set(LLVM_REQUIRES_RTTI OFF)/d' \
-        cmake/modules/AddLLVM.cmake
-%endif
 
 %build
 ulimit -Sn 4000
