@@ -10,14 +10,13 @@
 %define real_version 1.7.2207
 
 Name:          DirectXShaderCompiler
-Version:       1.4.0.2274+1281~git20220929.f0b5fd241
-Release:       0
+Version:       1.7.2207
+Release:       1
 Summary:       DirectX Shader Compiler
 License:       Apache-2.0 WITH LLVM-exception OR NCSA
 Group:         Development/Graphics
 URL:           https://github.com/microsoft/DirectXShaderCompiler/
-Source0:       %{name}-%{version}.tar.xz
-BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+Source0:       https://github.com/microsoft/DirectXShaderCompiler/archive/refs/tags/v%{version}/%{name}-%{version}.tar.gz
 %if 0%{?use_clang}
 BuildRequires: clang-devel
 BuildRequires: lld
@@ -31,8 +30,8 @@ BuildRequires: libxml2-devel
 BuildRequires: ocaml
 BuildRequires: git
 BuildRequires: xz
-Provides:      directxshadercompiler = %{real_version}
-Provides:      dxc = %{real_version}
+Provides:      directxshadercompiler = %{version}-%{release}
+Provides:      dxc = %{version}-%{release}
 
 %description
 The DirectX Shader Compiler project includes a compiler and related tools used to compile
@@ -51,7 +50,7 @@ DirectX Shader Compiler development files
 Summary:  DirectX Shader Compiler library
 Group:    Development/Graphics
 Provides: libdxcompiler = %{version}
-Provides: dxc-libdxcompiler = %{real_version}
+Provides: dxc-libdxcompiler = %{version}-%{release}
 
 %description libdxcompiler%{so_ver}
 DirectX Shader Compiler standalone dynamic library
@@ -60,7 +59,7 @@ DirectX Shader Compiler standalone dynamic library
 Summary:  DirectX Shader Compiler library development files
 Group:    Development/Graphics
 Requires: %{name}-libdxcompiler%{so_ver}
-Provides: dxc-libdxcompiler-devel = %{real_version}
+Provides: dxc-libdxcompiler-devel = %{version}-%{release}
 
 %description libdxcompiler-devel
 DirectX Shader Compiler standalone dynamic library
@@ -160,10 +159,10 @@ cmake .. \
     -DSPIRV_BUILD_TESTS=OFF \
     -DLLVM_USE_INTEL_JITEVENTS=ON
 
-%cmake_build
+%make_build
 
 %install
-%cmake_install
+%make_install -C build
 
 mkdir -p %{buildroot}%{_includedir} || echo "whatever"
 if [ ! -d "%{buildroot}%{_includedir}/dxc" ]; then
