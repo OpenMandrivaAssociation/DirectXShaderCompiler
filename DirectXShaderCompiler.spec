@@ -2,13 +2,7 @@
 %undefine _debugsource_packages
 
 %define __builder ninja
-%ifarch %{x86_64}
 %define use_clang 1
-%else
-%define use_clang 0
-%endif
-%global _lto_cflags %nil
-%global _lto_ldlags %nil
 %define so_ver 3_7
 %define real_version 1.7.2207
 
@@ -187,8 +181,8 @@ mkdir -p %{buildroot}/%{_libdir} || echo "whatever"
 if [ ! -f "%{buildroot}/%{_libdir}/libdxcompiler.so" ]; then
     mv -v build/lib*/libdxc* %{buildroot}/%{_libdir}/
 fi
+%if "%{_lib}" == "lib64"
 # fix correct lib folder
-%ifarch %{x86_64}
 if [ -d "%{buildroot}/%{_exec_prefix}/lib" ]; then
     mkdir -p %{buildroot}/%{_libdir} || echo "whatever"
     mv -v %{buildroot}/%{_exec_prefix}/lib/* %{buildroot}/%{_libdir}/
