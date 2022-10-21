@@ -1,5 +1,8 @@
+# Workaround for build system flaws
+%undefine _debugsource_packages
+
 %define __builder ninja
-%ifarch x86_64
+%ifarch %{x86_64}
 %define use_clang 1
 %else
 %define use_clang 0
@@ -17,6 +20,12 @@ License:       Apache-2.0 WITH LLVM-exception OR NCSA
 Group:         Development/Graphics
 URL:           https://github.com/microsoft/DirectXShaderCompiler/
 Source0:       https://github.com/microsoft/DirectXShaderCompiler/archive/refs/tags/v%{version}/%{name}-%{version}.tar.gz
+# dxc build process relies on the presence of spirv-headers source including
+# cmake files, for now just pointing it at the system copy the way it should
+# be doesn't work
+Source1:	https://github.com/KhronosGroup/SPIRV-Headers/archive/0bcc624926a25a2a273d07877fd25a6ff5ba1cfb.tar.gz
+Source2:	https://github.com/KhronosGroup/SPIRV-Tools/archive/71b2aee6c868a673ec82d1385f97593aa2881316.tar.gz
+Source3:	https://github.com/google/effcee/archive/35912e1b7778ec2ddcff7e7188177761539e59e0.tar.gz
 %if 0%{?use_clang}
 BuildRequires: clang-devel
 BuildRequires: lld
@@ -24,6 +33,7 @@ BuildRequires: lld
 BuildRequires: gcc-c++
 %endif
 BuildRequires: cmake
+BuildRequires: ninja
 BuildRequires: llvm-devel
 BuildRequires: ninja
 BuildRequires: libxml2-devel
@@ -65,7 +75,20 @@ Provides: dxc-libdxcompiler-devel = %{version}-%{release}
 DirectX Shader Compiler standalone dynamic library
 
 %prep
-%setup -q
+%autosetup -p1
+
+cd external
+rmdir SPIRV-Headers
+tar xf %{S:1}
+mv SPIRV-Headers-* SPIRV-Headers
+rmdir SPIRV-Tools
+tar xf %{S:2}
+mv SPIRV-Tools-* SPIRV-Tools
+rmdir effcee
+tar xf %{S:3}
+mv effcee-* effcee
+cd ..
+
 # clean out hardcoding
 %if 0%{?use_clang}
 sed -i -e 's/ -fno-exceptions//g' -e 's/ -fno-rtti//g' -e '/add_compile_options(-fno-rtti)/d' \
@@ -159,10 +182,10 @@ cmake .. \
     -DSPIRV_BUILD_TESTS=OFF \
     -DLLVM_USE_INTEL_JITEVENTS=ON
 
-%make_build
+%ninja_build
 
 %install
-%make_install -C build
+%ninja_install -C build
 
 mkdir -p %{buildroot}%{_includedir} || echo "whatever"
 if [ ! -d "%{buildroot}%{_includedir}/dxc" ]; then
@@ -173,7 +196,7 @@ if [ ! -f "%{buildroot}/%{_libdir}/libdxcompiler.so" ]; then
     mv -v build/lib*/libdxc* %{buildroot}/%{_libdir}/
 fi
 # fix correct lib folder
-%ifarch x86_64
+%ifarch %{x86_64}
 if [ -d "%{buildroot}/%{_exec_prefix}/lib" ]; then
     mkdir -p %{buildroot}/%{_libdir} || echo "whatever"
     mv -v %{buildroot}/%{_exec_prefix}/lib/* %{buildroot}/%{_libdir}/
