@@ -48,14 +48,6 @@ The DirectX Shader Compiler project includes a compiler and related tools used t
 High-Level Shader Language (HLSL) programs into DirectX Intermediate Language (DXIL) representation.
 Applications that make use of DirectX for graphics, games, and computation can use it to generate shader programs.
 
-%package devel
-Summary:  DirectX Shader Compiler development files
-Group:    Development/Graphics
-Requires: %{name}
-
-%description devel
-DirectX Shader Compiler development files
-
 %package libdxcompiler%{so_ver}
 Summary:  DirectX Shader Compiler library
 Group:    Development/Graphics
@@ -206,20 +198,15 @@ fi
 # Remove static libraries, don't think they are needed at all
 #rm %{buildroot}/%{_libdir}/*.a
 
+# Libclang and friends of this fork are harmful, use "real"
+# libclang
+rm -rf	%{buildroot}%{_includedir}/clang-c \
+	%{buildroot}%{_libdir}/libclang.a
+
 %files
 %doc README.md
 %license LICENSE.TXT
 %{_bindir}/dxc*
-
-%files devel
-%{_includedir}/*
-%exclude %{_includedir}/dxc
-#{_includedir}/llvm*
-#{_datadir}/*
-#{_bindir}/llvm-*
-#{_bindir}/opt
-%{_libdir}/*.a
-%exclude %{_libdir}/libdxclib.a
 
 %files libdxcompiler%{so_ver}
 %{_libdir}/libdxcompiler.so.*
