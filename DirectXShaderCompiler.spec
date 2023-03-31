@@ -8,7 +8,7 @@
 
 Name:          DirectXShaderCompiler
 Version:       1.7.2207
-Release:       1
+Release:       2
 Summary:       DirectX Shader Compiler
 License:       Apache-2.0 WITH LLVM-exception OR NCSA
 Group:         Development/Graphics
