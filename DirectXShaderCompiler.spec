@@ -7,8 +7,8 @@
 %define real_version 1.7.2207
 
 Name:          DirectXShaderCompiler
-Version:       1.7.2207
-Release:       2
+Version:       1.7.2212
+Release:       1
 Summary:       DirectX Shader Compiler
 License:       Apache-2.0 WITH LLVM-exception OR NCSA
 Group:         Development/Graphics
