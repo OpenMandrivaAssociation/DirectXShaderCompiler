@@ -1,13 +1,13 @@
 # Workaround for build system flaws
 %undefine _debugsource_packages
 
-%define __builder ninja
 %define use_clang 1
 %define so_ver 3_7
-%define real_version 1.7.2207
+%define libdxcompiler %{mklibname dxcompiler}
+%define devdxcompiler %{mklibname -d dxcompiler}
 
 Name:          DirectXShaderCompiler
-Version:       1.7.2207
+Version:       1.8.2502
 Release:       2
 Summary:       DirectX Shader Compiler
 License:       Apache-2.0 WITH LLVM-exception OR NCSA
@@ -17,9 +17,10 @@ Source0:       https://github.com/microsoft/DirectXShaderCompiler/archive/refs/t
 # dxc build process relies on the presence of spirv-headers source including
 # cmake files, for now just pointing it at the system copy the way it should
 # be doesn't work
-Source1:	https://github.com/KhronosGroup/SPIRV-Headers/archive/0bcc624926a25a2a273d07877fd25a6ff5ba1cfb.tar.gz
-Source2:	https://github.com/KhronosGroup/SPIRV-Tools/archive/71b2aee6c868a673ec82d1385f97593aa2881316.tar.gz
-Source3:	https://github.com/google/effcee/archive/35912e1b7778ec2ddcff7e7188177761539e59e0.tar.gz
+# Expected git commit IDs can be seen at https://github.com/microsoft/DirectXShaderCompiler/tree/main/external
+Source1:	https://github.com/KhronosGroup/SPIRV-Headers/archive/54a521dd130ae1b2f38fef79b09515702d135bdd.tar.gz
+Source2:	https://github.com/KhronosGroup/SPIRV-Tools/archive/f289d047f49fb60488301ec62bafab85573668cc.tar.gz
+Source3:	https://github.com/microsoft/DirectX-Headers/archive/980971e835876dc0cde415e8f9bc646e64667bf7.tar.gz
 %if 0%{?use_clang}
 BuildRequires: clang-devel
 BuildRequires: lld
@@ -37,27 +38,32 @@ BuildRequires: xz
 Provides:      directxshadercompiler = %{version}-%{release}
 Provides:      dxc = %{version}-%{release}
 
+%patchlist
+dxsc-soversion.patch
+
 %description
 The DirectX Shader Compiler project includes a compiler and related tools used to compile
 High-Level Shader Language (HLSL) programs into DirectX Intermediate Language (DXIL) representation.
 Applications that make use of DirectX for graphics, games, and computation can use it to generate shader programs.
 
-%package libdxcompiler%{so_ver}
+%package -n %{libdxcompiler}
 Summary:  DirectX Shader Compiler library
 Group:    Development/Graphics
 Provides: libdxcompiler = %{version}
 Provides: dxc-libdxcompiler = %{version}-%{release}
+%rename %{name}-libdxcompiler%{so_ver}
 
-%description libdxcompiler%{so_ver}
+%description -n %{libdxcompiler}
 DirectX Shader Compiler standalone dynamic library
 
-%package libdxcompiler-devel
+%package -n %{devdxcompiler}
 Summary:  DirectX Shader Compiler library development files
 Group:    Development/Graphics
 Requires: %{name}-libdxcompiler%{so_ver}
 Provides: dxc-libdxcompiler-devel = %{version}-%{release}
+%rename %{name}-libdxcompiler-devel
 
-%description libdxcompiler-devel
+%description -n %{devdxcompiler}
 DirectX Shader Compiler standalone dynamic library
 
 %prep
@@ -70,20 +76,20 @@ mv SPIRV-Headers-* SPIRV-Headers
 rmdir SPIRV-Tools
 tar xf %{S:2}
 mv SPIRV-Tools-* SPIRV-Tools
-rmdir effcee
+rmdir DirectX-Headers
 tar xf %{S:3}
-mv effcee-* effcee
+mv DirectX-Headers-* DirectX-Headers
 cd ..
 
 # clean out hardcoding
-%if 0%{?use_clang}
-sed -i -e 's/ -fno-exceptions//g' -e 's/ -fno-rtti//g' -e '/add_compile_options(-fno-rtti)/d' \
-        external/SPIRV-Tools/CMakeLists.txt \
-        external/effcee/cmake/setup_build.cmake
-sed -i -e '/"-Werror",/d' -e '/"-fno-exceptions",/d' -e '/"-fno-rtti",/d' \
-        external/SPIRV-Tools/build_defs.bzl
-sed -i -e '/CmdArgs.push_back("-fno-exceptions");/d' -e '/CmdArgs.push_back("-fno-rtti");/d' -e '/CmdArgs.push_back("-fno-rtti-data");/d' \
-        tools/clang/lib/Driver/Tools.cpp
+%if 0%{?use_clang:1}
+#sed -i -e 's/ -fno-exceptions//g' -e 's/ -fno-rtti//g' -e '/add_compile_options(-fno-rtti)/d' \
+#        external/SPIRV-Tools/CMakeLists.txt \
+#        external/effcee/cmake/setup_build.cmake
+#sed -i -e '/"-Werror",/d' -e '/"-fno-exceptions",/d' -e '/"-fno-rtti",/d' \
+#        external/SPIRV-Tools/build_defs.bzl
+#sed -i -e '/CmdArgs.push_back("-fno-exceptions");/d' -e '/CmdArgs.push_back("-fno-rtti");/d' -e '/CmdArgs.push_back("-fno-rtti-data");/d' \
+#        tools/clang/lib/Driver/Tools.cpp
 sed -i -e '/list(APPEND LLVM_COMPILE_FLAGS "-fno-exceptions")/d' \
     -e '/list(APPEND LLVM_COMPILE_FLAGS "-fno-rtti")/d' \
     -e '/set(LLVM_REQUIRES_RTTI OFF)/d' \
@@ -200,12 +206,17 @@ rm -rf	%{buildroot}%{_includedir}/clang-c \
 %files
 %doc README.md
 %license LICENSE.TXT
+%{_bindir}/dxa*
 %{_bindir}/dxc*
+%{_bindir}/dxl*
+%{_bindir}/dxopt*
+%{_bindir}/dxr*
+%{_bindir}/dxv*
 
-%files libdxcompiler%{so_ver}
-%{_libdir}/libdxcompiler.so.*
+%files -n %{libdxcompiler}
+%{_libdir}/libdxcompiler.so*
 
-%files libdxcompiler-devel
+%files -n %{devdxcompiler}
 %{_includedir}/dxc
-%{_libdir}/libdxcompiler.so
 %{_libdir}/libdxclib.a
+%{_libdir}/libdxcvalidator.a

@@ -1,0 +1,11 @@
+diff -up DirectXShaderCompiler-1.8.2502/tools/clang/tools/dxcompiler/CMakeLists.txt.omv~ DirectXShaderCompiler-1.8.2502/tools/clang/tools/dxcompiler/CMakeLists.txt
+--- DirectXShaderCompiler-1.8.2502/tools/clang/tools/dxcompiler/CMakeLists.txt.omv~	2025-03-13 16:37:31.170176395 +0100
++++ DirectXShaderCompiler-1.8.2502/tools/clang/tools/dxcompiler/CMakeLists.txt	2025-03-13 16:37:40.423430093 +0100
+@@ -143,6 +143,7 @@ set_target_properties(dxcompiler
+   PROPERTIES
+   OUTPUT_NAME "dxcompiler"
+   VERSION ${LIBCLANG_LIBRARY_VERSION}
++  SOVERSION ${LIBCLANG_LIBRARY_VERSION}
+   DEFINE_SYMBOL _CINDEX_LIB_)
+ 
+ if (WIN32)
