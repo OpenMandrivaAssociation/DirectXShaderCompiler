@@ -1,0 +1,19 @@
+diff -up DirectXShaderCompiler-1.8.2505.1/lib/DxcSupport/WinFunctions.cpp.omv~ DirectXShaderCompiler-1.8.2505.1/lib/DxcSupport/WinFunctions.cpp
+--- DirectXShaderCompiler-1.8.2505.1/lib/DxcSupport/WinFunctions.cpp.omv~	2025-11-02 00:58:41.776590741 +0100
++++ DirectXShaderCompiler-1.8.2505.1/lib/DxcSupport/WinFunctions.cpp	2025-11-02 00:58:50.471679551 +0100
+@@ -132,6 +132,7 @@ int _wcsnicmp(const wchar_t *str1, const
+   return str1[i] - str2[i];
+ }
+ 
++#ifndef __i386__
+ unsigned char _BitScanForward(unsigned long *Index, unsigned long Mask) {
+   unsigned long l;
+   if (!Mask)
+@@ -141,6 +142,7 @@ unsigned char _BitScanForward(unsigned l
+   *Index = l;
+   return 1;
+ }
++#endif
+ 
+ HANDLE CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
+                    DWORD dwCreationDisposition, void *pCreateExParams) {
