@@ -15,7 +15,7 @@
 %endif
 
 Name:          DirectXShaderCompiler
-Version:       1.8.2505.1
+Version:       1.10.2605.24
 Release:       1
 Summary:       DirectX Shader Compiler
 License:       Apache-2.0 WITH LLVM-exception OR NCSA
